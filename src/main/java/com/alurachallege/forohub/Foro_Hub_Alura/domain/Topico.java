@@ -4,13 +4,17 @@ package com.alurachallege.forohub.Foro_Hub_Alura.domain;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.alurachallege.forohub.Foro_Hub_Alura.repository.CursoRepository;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Getter
 @Setter
-@NoArgsConstructor
+
 @Entity
 @Table(name = "topico")
 public class Topico {
@@ -30,6 +34,10 @@ public class Topico {
     @Column(nullable = false)
     private String status = "ABIERTO";
 
+    @Column(nullable = false)
+    private boolean activo = true;
+
+
     @ManyToOne
     @JoinColumn(name = "autor_id", nullable = false)
     private Usuario autor;
@@ -40,6 +48,31 @@ public class Topico {
 
     @OneToMany(mappedBy = "topico", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Respuesta> respuestas;
+    public Topico() {
+        // Inicialización, si es necesario
+    }
+
+    public void actualizarDatos(DatosActualizarTopico datosActualizarTopico, CursoRepository cursoRepository) {
+        if(datosActualizarTopico.titulo() != null){
+            this.titulo = datosActualizarTopico.titulo();
+        }
+        if (datosActualizarTopico.mensaje() != null){
+            this.mensaje = datosActualizarTopico.mensaje();
+        }
+        if (datosActualizarTopico.cursoId() != null) {
+            Curso curso = cursoRepository.findById(datosActualizarTopico.cursoId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso no encontrado"));
+            this.curso = curso;
+        }
+
+
+
+    }
+
+    public void desactivarTopico() {
+        this.activo = false;
+    }
+    public void activarTopico() { this.activo = true;    }
 
     public Topico(DatosRegistroTopico datosRegistroTopico, Usuario autor, Curso curso) {
         this.titulo = datosRegistroTopico.titulo();
