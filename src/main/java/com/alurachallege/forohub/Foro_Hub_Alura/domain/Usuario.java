@@ -1,19 +1,17 @@
 package com.alurachallege.forohub.Foro_Hub_Alura.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.List;
-
-
-
-import jakarta.persistence.*;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
 @Table(name = "usuario")
-public class Usuario {
+public class Usuario implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,7 +21,8 @@ public class Usuario {
     @Column(name = "correo_electronico", unique = true, nullable = false)
     private String correoElectronico;
 
-    private String contrasena;
+    @JsonProperty("password")
+    private String password;
 
     @ManyToMany
     @JoinTable(
@@ -38,14 +37,14 @@ public class Usuario {
     public Usuario(String nombre) {
         this.nombre = nombre;
         this.correoElectronico = "default@example.com"; // Cambiar según tu lógica
-        this.contrasena = "default_password";          // Cambiar según tu lógica
+        this.password = "default_password";          // Cambiar según tu lógica
     }
 
-    public Usuario(Long id, String nombre, String correoElectronico, String contrasena, List<Perfil> perfiles) {
+    public Usuario(Long id, String nombre, String correoElectronico, String password, List<Perfil> perfiles) {
         this.id = id;
         this.nombre = nombre;
         this.correoElectronico = correoElectronico;
-        this.contrasena = contrasena;
+        this.password = password;
         this.perfiles = perfiles;
     }
 
@@ -75,12 +74,42 @@ public class Usuario {
         this.correoElectronico = correoElectronico;
     }
 
-    public String getContrasena() {
-        return contrasena;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
     }
 
-    public void setContrasena(String contrasena) {
-        this.contrasena = contrasena;
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return "";
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return UserDetails.super.isAccountNonLocked();
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return UserDetails.super.isEnabled();
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public List<Perfil> getPerfiles() {
